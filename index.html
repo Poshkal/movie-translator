@@ -2,10 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>电影语音翻译 — 中文→维/乌实时翻译</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>电影语音翻译</title>
 <style>
   :root {
     --bg: #09090b; --card: #18181b; --border: #27272a;
@@ -16,8 +14,10 @@
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
     background: var(--bg); color: var(--text); min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none; -webkit-user-select: none;
   }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
 
   .lang-btn {
     display: flex; align-items: center; gap: 10px;
@@ -34,55 +34,54 @@
   .lang-btn .sub { font-size: 0.75rem; color: var(--muted); display: block; margin-top: 2px; }
 
   .main-btn {
-    width: 100%; padding: 16px 24px; border-radius: 100px;
+    width: 100%; padding: 18px 24px; border-radius: 100px;
     border: none; cursor: pointer; font-weight: 700; font-size: 1rem;
     transition: all 0.3s ease; letter-spacing: 0.03em;
     background: var(--accent); color: white;
     display: flex; align-items: center; justify-content: center; gap: 10px;
-    font-family: inherit;
+    font-family: inherit; -webkit-appearance: none;
   }
-  .main-btn:hover { filter: brightness(1.15); }
   .main-btn:active { transform: scale(0.97); }
-  .main-btn.recording { background: var(--danger); animation: pulse 2s ease-in-out infinite; }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
-    50% { box-shadow: 0 0 0 18px rgba(239,68,68,0); }
-  }
+  .main-btn.recording { background: var(--danger); }
 
   .status-row {
-    display: flex; align-items: center; gap: 14px;
-    padding: 16px; border-radius: 14px; background: rgba(0,0,0,0.3);
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-radius: 14px; background: rgba(0,0,0,0.3);
   }
-  .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   .dot.idle { background: var(--muted); }
-  .dot.listening { background: #22c55e; animation: dotP 1s infinite; }
-  .dot.translating { background: #f59e0b; animation: dotP 0.5s infinite; }
-  .dot.speaking { background: #8b5cf6; animation: dotP 0.6s infinite; }
+  .dot.listening { background: #22c55e; }
+  .dot.translating { background: #f59e0b; }
+  .dot.speaking { background: #8b5cf6; }
   .dot.error { background: var(--danger); }
-  @keyframes dotP {
-    0%, 100% { box-shadow: 0 0 0 0 currentColor; }
-    50% { box-shadow: 0 0 0 12px transparent; }
-  }
 
-  .waves { display: flex; align-items: flex-end; gap: 2px; height: 32px; margin-left: auto; }
+  .waves { display: flex; align-items: flex-end; gap: 2px; height: 28px; margin-left: auto; }
   .waves .w { width: 3px; background: var(--accent2); border-radius: 2px; opacity: 0.7; }
 
-  .log-line {
-    font-size: 0.75rem; color: var(--muted); padding: 4px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
-    font-family: 'SF Mono', 'Consolas', monospace;
+  .log-panel {
+    max-height: 160px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    font-family: 'SF Mono', 'Consolas', monospace; font-size: 0.7rem;
+    color: var(--muted); line-height: 1.6;
   }
-  .log-line.ok { color: #4ade80; }
-  .log-line.err { color: #f87171; }
-  .log-line.info { color: #60a5fa; }
+  .log-panel .ok { color: #4ade80; }
+  .log-panel .err { color: #f87171; }
+  .log-panel .info { color: #60a5fa; }
 
   .test-btn {
-    width: 100%; padding: 10px; border-radius: 12px;
+    width: 100%; padding: 12px; border-radius: 14px;
     border: 1px dashed var(--border); background: transparent;
-    color: var(--muted); cursor: pointer; font-size: 0.8rem;
-    transition: all 0.2s; font-family: inherit;
+    color: var(--muted); cursor: pointer; font-size: 0.85rem;
+    transition: all 0.2s; font-family: inherit; -webkit-appearance: none;
   }
-  .test-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .test-btn:active { border-color: var(--accent2); color: var(--accent2); }
+
+  .pulse {
+    animation: p 2s ease-in-out infinite;
+  }
+  @keyframes p {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+    50% { box-shadow: 0 0 0 16px rgba(239,68,68,0); }
+  }
 </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -91,17 +90,17 @@
   <div class="text-center mb-6">
     <div class="text-3xl mb-2">🎬</div>
     <h1 class="text-xl font-bold">电影语音翻译</h1>
-    <p class="text-xs text-[var(--muted)] mt-1">中文 → 维吾尔语/乌兹别克语 · 纯音频输出</p>
+    <p class="text-xs text-[var(--muted)] mt-1">中文 → 维吾尔语 / 乌兹别克语</p>
   </div>
 
   <div class="card space-y-4 mb-4">
-    <!-- Lang -->
+    <!-- Language -->
     <div class="grid grid-cols-2 gap-3">
-      <button class="lang-btn active" onclick="selectLang('ug', this)" id="btn-ug">
+      <button class="lang-btn active" onclick="pick('ug', this)" id="btn-ug">
         <span class="emoji">🏴</span>
         <span><span class="title">维吾尔语</span><span class="sub">Uyghur</span></span>
       </button>
-      <button class="lang-btn" onclick="selectLang('uz', this)" id="btn-uz">
+      <button class="lang-btn" onclick="pick('uz', this)" id="btn-uz">
         <span class="emoji">🇺🇿</span>
         <span><span class="title">乌兹别克语</span><span class="sub">Uzbek</span></span>
       </button>
@@ -111,77 +110,61 @@
     <div class="status-row">
       <span class="dot idle" id="dot"></span>
       <div class="min-w-0 flex-1">
-        <div class="font-semibold text-sm" id="title">就绪</div>
-        <div class="text-xs text-[var(--muted)] mt-0.5 truncate" id="desc">点击「开始监听」即可</div>
+        <div class="font-semibold text-sm" id="st">就绪</div>
+        <div class="text-xs text-[var(--muted)] mt-0.5 truncate" id="sd">点击下方按钮开始</div>
       </div>
       <div class="waves" id="waves"></div>
     </div>
 
-    <!-- Buttons -->
-    <button class="main-btn" id="mainBtn" onclick="toggle()">
-      <i class="fa fa-microphone"></i>
-      <span id="btnLabel">开始监听</span>
+    <!-- Main Button -->
+    <button class="main-btn" id="mb" onclick="toggle()">
+      <span id="mbIcon" style="font-size:1.2rem;">🎤</span>
+      <span id="mbText">开始监听</span>
     </button>
 
-    <!-- Test audio -->
-    <button class="test-btn" onclick="testAudio()">
-      <i class="fa fa-volume-up"></i> 测试音频播放
-    </button>
+    <!-- Test -->
+    <button class="test-btn" onclick="testAudio()">🔊 测试音频播放</button>
 
     <!-- Log -->
-    <div id="log" class="max-h-32 overflow-y-auto space-y-0"></div>
+    <div class="log-panel" id="log"></div>
   </div>
 
-  <p class="text-xs text-[var(--muted)] text-center">
-    💡 戴耳机 → 麦克风靠近耳机 → 说话即可翻译
-  </p>
+  <p class="text-xs text-[var(--muted)] text-center">💡 戴耳机 → 麦克风靠近耳机 → 说话即可翻译</p>
 </div>
 
 <script>
 // ── State ──
-let target = 'ug';
-let active = false;
-let recognition = null;
-let utteranceQueue = [];
-let speaking = false;
-let audioCtx = null;
-
-// ── Logging ──
-function log(msg, cls = '') {
+let lang = 'ug', active = false, rec = null, queue = [], speaking = false;
+const L = (m, c) => {
   const el = document.getElementById('log');
-  const time = new Date().toLocaleTimeString('zh-CN', { hour12: false });
-  el.innerHTML += `<div class="log-line ${cls}">${time} ${msg}</div>`;
+  const t = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+  el.innerHTML += `<div class="${c||''}">${t} ${m}</div>`;
   el.scrollTop = el.scrollHeight;
-  // Keep max 50 lines
-  while (el.children.length > 50) el.firstChild.remove();
-}
+  while (el.children.length > 40) el.firstChild.remove();
+};
 
 // ── Lang ──
-function selectLang(lang, el) {
-  target = lang;
+function pick(l, el) {
+  lang = l;
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
-  log(`目标语言: ${lang === 'ug' ? '维吾尔语' : '乌兹别克语'}`, 'info');
+  L(`语言: ${l==='ug'?'维吾尔语':'乌兹别克语'}`, 'info');
 }
 
 // ── Status ──
-function status(state, title, desc) {
+function S(state, title, desc) {
   document.getElementById('dot').className = 'dot ' + state;
-  document.getElementById('title').textContent = title;
-  document.getElementById('desc').textContent = desc || '';
-  waves(state);
-}
-
-function waves(state) {
+  document.getElementById('st').textContent = title;
+  document.getElementById('sd').textContent = desc || '';
   const c = document.getElementById('waves');
   if (state === 'idle') { c.innerHTML = ''; return; }
-  const n = 12;
+  const n = 10;
   c.innerHTML = Array.from({length: n}, () => '<div class="w"></div>').join('');
   if (state === 'listening') {
     const loop = () => {
       if (!active) { c.innerHTML = ''; return; }
       c.querySelectorAll('.w').forEach(w => {
-        w.style.height = (4 + Math.random() * 24) + 'px';
+        w.style.height = (5 + Math.random() * 20) + 'px';
       });
       requestAnimationFrame(() => setTimeout(loop, 70));
     };
@@ -189,286 +172,222 @@ function waves(state) {
   }
 }
 
-// ── Audio Context (bypass autoplay restrictions) ──
-function ensureAudioCtx() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
-}
-
-// ── TTS — Core ──
+// ── MICROSOFT EDGE TTS (free, works in China, supports Uyghur & Uzbek) ──
 async function speak(text) {
-  log(`🔊 尝试播放: "${text.slice(0, 40)}..."`, 'info');
+  L(`🔊 合成语音: "${text.slice(0,30)}..."`, 'info');
 
-  // Strategy 1: Google TTS direct
-  const googleURLs = [
-    `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${target}&q=${encodeURIComponent(text)}`,
-    `https://translate.google.cn/translate_tts?ie=UTF-8&client=tw-ob&tl=${target}&q=${encodeURIComponent(text)}`,
-  ];
+  // Edge neural voices: best quality, free, accessible from China
+  const voiceName = lang === 'ug' ? 'ug-CN-UyghurNeural' : 'uz-UZ-MadinaNeural';
+  const voiceLang = lang === 'ug' ? 'ug-CN' : 'uz-UZ';
 
-  for (const url of googleURLs) {
+  // Try primary SSML voices
+  const names = lang === 'ug'
+    ? ['ug-CN-UyghurNeural', 'ug-CN']
+    : ['uz-UZ-MadinaNeural', 'uz-UZ-SardorNeural', 'uz-UZ'];
+
+  for (const name of names) {
     try {
-      const resp = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      const ssml = `<speak version='1.0' xml:lang='${voiceLang}'><voice xml:lang='${voiceLang}' name='${name}'>${esc(text)}</voice></speak>`;
+      const resp = await fetch(
+        'https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'audio-24khz-48kbitrate-mono-mp3' },
+          body: ssml,
+          signal: AbortSignal.timeout(10000),
+        }
+      );
       if (resp.ok) {
         const blob = await resp.blob();
-        if (blob.size > 500) {
-          await playBlob(blob);
-          log('✓ Google TTS 播放成功', 'ok');
+        if (blob.size > 300) {
+          await playAudio(blob);
+          L(`✓ 语音播放完成 (${name})`, 'ok');
           return;
         }
       }
-    } catch(e) { /* next */ }
+    } catch(e) { /* next name */ }
   }
 
-  // Strategy 2: Browser SpeechSynthesis
-  log('Google TTS 不可用，尝试浏览器内置 TTS...');
+  // Fallback: browser SpeechSynthesis
+  L('Edge TTS 不可用，尝试浏览器内置语音...', 'info');
   try {
-    await browserTTS(text);
-    log('✓ 浏览器 TTS 播放成功', 'ok');
+    await browserSpeak(text);
+    L('✓ 浏览器语音播放完成', 'ok');
     return;
   } catch(e) {
-    log(`浏览器 TTS 失败: ${e.message}`, 'err');
+    L(`浏览器语音失败: ${e.message}`, 'err');
   }
-
-  log('所有 TTS 方案均失败，请检查网络连接', 'err');
+  L('❌ 所有语音方案均失败', 'err');
 }
 
-function playBlob(blob) {
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function playAudio(blob) {
   return new Promise((resolve, reject) => {
-    ensureAudioCtx();
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        const buffer = await audioCtx.decodeAudioData(reader.result);
-        const source = audioCtx.createBufferSource();
-        source.buffer = buffer;
-        source.connect(audioCtx.destination);
-        source.onended = resolve;
-        source.start();
-      } catch(e) {
-        // Fallback: use <audio> element
-        const url = URL.createObjectURL(blob);
-        const a = new Audio(url);
-        a.onended = resolve;
-        a.onerror = () => reject(new Error('audio playback failed'));
-        a.play().catch(reject);
-      }
+    const url = URL.createObjectURL(blob);
+    const a = new Audio(url);
+    a.onended = () => { URL.revokeObjectURL(url); resolve(); };
+    a.onerror = (e) => {
+      URL.revokeObjectURL(url);
+      // Try alternative: decode+play via AudioContext
+      const ctx = new (window.AudioContext||window.webkitAudioContext)();
+      blob.arrayBuffer().then(buf => ctx.decodeAudioData(buf)).then(buf => {
+        const src = ctx.createBufferSource();
+        src.buffer = buf; src.connect(ctx.destination);
+        src.onended = resolve;
+        src.start();
+      }).catch(() => reject(new Error('playback failed')));
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
+    a.play().catch(() => reject(new Error('autoplay blocked')));
   });
 }
 
-function browserTTS(text) {
+function browserSpeak(text) {
   return new Promise((resolve, reject) => {
     const synth = window.speechSynthesis;
-    if (!synth) return reject(new Error('SpeechSynthesis not supported'));
-
-    const doSpeak = () => {
+    if (!synth) return reject(new Error('no SpeechSynthesis'));
+    const doIt = () => {
       const voices = synth.getVoices();
-      if (voices.length === 0) return reject(new Error('no voices available'));
-
-      // Find matching voice or use any available
-      const voice = voices.find(v => v.lang.startsWith(target)) ||
-                    voices.find(v => v.lang.includes('zh')) ||
-                    voices[0];
-
-      log(`使用语音: ${voice.name} (${voice.lang})`);
-
+      if (!voices.length) return reject(new Error('no voices'));
+      const v = voices.find(x => x.lang.startsWith(lang)) ||
+                voices.find(x => x.lang.includes('zh')) ||
+                voices[0];
       const u = new SpeechSynthesisUtterance(text);
-      u.voice = voice;
-      u.rate = 0.85;
-      u.pitch = 1.0;
-      u.volume = 1.0;
-      u.onend = () => resolve();
-      u.onerror = (e) => reject(new Error(`TTS error: ${e.error}`));
+      u.voice = v; u.rate = 0.9; u.pitch = 1; u.volume = 1;
+      u.onend = resolve;
+      u.onerror = e => reject(new Error(e.error));
       synth.speak(u);
     };
-
-    if (synth.getVoices().length > 0) {
-      doSpeak();
-    } else {
-      const timeout = setTimeout(() => reject(new Error('voices load timeout')), 3000);
-      synth.onvoiceschanged = () => {
-        clearTimeout(timeout);
-        doSpeak();
-      };
-    }
+    if (synth.getVoices().length) doIt();
+    else synth.onvoiceschanged = doIt;
   });
 }
 
-// ── Test Audio ──
+// ── Test ──
 async function testAudio() {
-  ensureAudioCtx();
-  log('🔈 开始音频测试...', 'info');
-  const testText = target === 'ug' ? 'ياخشىمۇسىز' : "Salom, dunyo";
-  try {
-    await speak(testText);
-    log('✓ 测试音频播放完成', 'ok');
-  } catch(e) {
-    log(`测试音频失败: ${e.message}`, 'err');
-  }
+  L('🔈 音频测试开始...', 'info');
+  const t = lang === 'ug' ? 'ياخشىمۇسىز، بۇ بىر سىناق' : "Salom, bu test audio";
+  try { await speak(t); L('✅ 测试成功!', 'ok'); }
+  catch(e) { L(`❌ 测试失败: ${e.message}`, 'err'); }
 }
 
 // ── Translate ──
-async function translate(text) {
-  log(`📝 翻译: "${text.slice(0, 35)}..."`);
+async function tr(text) {
+  L(`📝 翻译: "${text.slice(0,30)}..."`);
+  const urls = lang === 'ug'
+    ? [
+        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=ug&dt=t&q=${encodeURIComponent(text)}`,
+        `https://translate.google.cn/translate_a/single?client=gtx&sl=zh-CN&tl=ug&dt=t&q=${encodeURIComponent(text)}`,
+      ]
+    : [
+        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=uz&dt=t&q=${encodeURIComponent(text)}`,
+        `https://translate.google.cn/translate_a/single?client=gtx&sl=zh-CN&tl=uz&dt=t&q=${encodeURIComponent(text)}`,
+      ];
 
-  // Backend 1: Google
-  const googleURLs = [
-    `https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=${target}&dt=t&q=${encodeURIComponent(text)}`,
-    `https://translate.google.cn/translate_a/single?client=gtx&sl=zh-CN&tl=${target}&dt=t&q=${encodeURIComponent(text)}`,
-    `https://translate-pa.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=${target}&dt=t&q=${encodeURIComponent(text)}`,
-  ];
-
-  for (const url of googleURLs) {
+  for (const url of urls) {
     try {
-      const r = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
       const d = await r.json();
       if (d?.[0]) {
         const result = d[0].map(p => p[0]).join('');
-        log(`✓ 翻译结果: "${result.slice(0, 40)}..."`, 'ok');
+        L(`✓ 翻译: "${result.slice(0,40)}..."`, 'ok');
         return result;
       }
     } catch(e) { /* next */ }
   }
 
-  // Backend 2: MyMemory
+  // MyMemory fallback
   try {
-    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=zh|${target}`;
-    const r = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=zh|${lang}`, { signal: AbortSignal.timeout(6000) });
     const d = await r.json();
     if (d?.responseData?.translatedText) {
-      log(`✓ MyMemory: "${d.responseData.translatedText.slice(0, 40)}..."`, 'ok');
+      L(`✓ MyMemory: "${d.responseData.translatedText.slice(0,40)}..."`, 'ok');
       return d.responseData.translatedText;
     }
-  } catch(e) { /* next */ }
+  } catch(e) {}
 
-  log('所有翻译后端均失败', 'err');
+  L('❌ 所有翻译后端不可用', 'err');
   return null;
 }
 
 // ── Queue ──
-async function flushQueue() {
-  if (speaking || utteranceQueue.length === 0) return;
+async function flush() {
+  if (speaking || !queue.length) return;
   speaking = true;
-  const text = utteranceQueue.shift();
-  status('speaking', '播放翻译中...');
+  const text = queue.shift();
+  S('speaking', '播放翻译中...');
   await speak(text);
   speaking = false;
-  if (utteranceQueue.length > 0) {
-    flushQueue();
-  } else if (active) {
-    status('listening', '监听中...', '等待语音输入');
-  } else {
-    status('idle', '就绪');
-  }
+  if (queue.length) flush();
+  else if (active) S('listening', '监听中...', '等待语音输入');
+  else S('idle', '就绪');
 }
 
 // ── Recognition ──
-function initRecognition() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) {
-    log('浏览器不支持语音识别，请使用 Chrome 或 Edge', 'err');
-    alert('请使用 Chrome 或 Edge 浏览器打开此页面');
-    return null;
-  }
-  const rec = new SR();
-  rec.lang = 'zh-CN';
-  rec.continuous = true;
-  rec.interimResults = true;
-  rec.maxAlternatives = 1;
-  return rec;
-}
-
-// ── Toggle ──
 function toggle() {
   if (active) { stop(); return; }
   start();
 }
 
 function start() {
-  ensureAudioCtx();
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { L('❌ 浏览器不支持语音识别，请用 Chrome/Edge', 'err'); alert('请使用 Chrome 或 Edge 浏览器'); return; }
 
-  recognition = initRecognition();
-  if (!recognition) return;
+  rec = new SR();
+  rec.lang = 'zh-CN';
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.maxAlternatives = 1;
 
-  recognition.onresult = async e => {
+  rec.onresult = async e => {
     for (let i = e.resultIndex; i < e.results.length; i++) {
       if (!e.results[i].isFinal) continue;
       const text = e.results[i][0].transcript.trim();
       if (text.length < 2) continue;
-      log(`🎤 识别: "${text}"`);
-      status('translating', '翻译中...', text.slice(0, 30) + (text.length > 30 ? '…' : ''));
-      const result = await translate(text);
-      if (result) {
-        utteranceQueue.push(result);
-        flushQueue();
-      } else {
-        status('listening', '监听中...', '翻译失败，请检查网络');
-      }
+      L(`🎤 识别: "${text}"`);
+      S('translating', '翻译中...', text.slice(0, 30) + (text.length > 30 ? '…' : ''));
+      const r = await tr(text);
+      if (r) { queue.push(r); flush(); }
+      else if (active) S('listening', '监听中...', '翻译失败，重试中');
     }
   };
 
-  recognition.onerror = e => {
-    if (e.error === 'no-speech') {
-      if (active) status('listening', '监听中...', '等待语音输入');
-      return;
-    }
+  rec.onerror = e => {
+    if (e.error === 'no-speech') { if (active) S('listening', '监听中...'); return; }
     if (e.error === 'aborted') return;
-    if (e.error === 'not-allowed') {
-      log('麦克风权限被拒绝！请在浏览器设置中允许麦克风', 'err');
-      status('error', '麦克风权限被拒绝');
-      stop();
-      return;
-    }
-    log(`语音识别错误: ${e.error}`, 'err');
-    if (active) status('listening', '识别出错', '正在恢复...');
+    if (e.error === 'not-allowed') { L('❌ 麦克风权限被拒绝!', 'err'); stop(); return; }
+    L(`⚠ 识别错误: ${e.error}`, 'err');
   };
 
-  recognition.onend = () => {
-    if (active) {
-      setTimeout(() => {
-        if (active) try { recognition.start(); } catch(_) {}
-      }, 200);
-    }
-  };
+  rec.onend = () => { if (active) setTimeout(() => { if (active) try { rec.start(); } catch(_){} }, 200); };
 
-  try {
-    recognition.start();
-    active = true;
-    document.getElementById('mainBtn').classList.add('recording');
-    document.getElementById('btnLabel').textContent = '停止翻译';
-    document.getElementById('mainBtn').querySelector('i').className = 'fa fa-stop';
-    status('listening', '监听中...', '请开始说话');
-    log('🎤 开始监听...', 'ok');
-  } catch(e) {
-    log(`启动失败: ${e.message}`, 'err');
-    status('error', '启动失败', e.message);
-  }
+  rec.start();
+  active = true;
+  document.getElementById('mb').classList.add('recording', 'pulse');
+  document.getElementById('mbIcon').textContent = '⏹';
+  document.getElementById('mbText').textContent = '停止翻译';
+  S('listening', '监听中...', '请说话');
+  L('🎤 开始监听', 'ok');
 }
 
 function stop() {
   active = false;
-  if (recognition) { recognition.stop(); recognition = null; }
-  utteranceQueue = [];
+  if (rec) { rec.stop(); rec = null; }
+  queue = []; speaking = false;
   window.speechSynthesis?.cancel();
-  speaking = false;
-  document.getElementById('mainBtn').classList.remove('recording');
-  document.getElementById('btnLabel').textContent = '开始监听';
-  document.getElementById('mainBtn').querySelector('i').className = 'fa fa-microphone';
-  status('idle', '已停止');
+  const mb = document.getElementById('mb');
+  mb.classList.remove('recording', 'pulse');
+  document.getElementById('mbIcon').textContent = '🎤';
+  document.getElementById('mbText').textContent = '开始监听';
+  S('idle', '已停止');
   document.getElementById('waves').innerHTML = '';
-  log('⏹ 已停止');
+  L('⏹ 已停止');
 }
 
-// Preload
+// Preload voices
 if (window.speechSynthesis) {
-  window.speechSynthesis.getVoices();
-  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+  speechSynthesis.getVoices();
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
 }
 </script>
 </body>
