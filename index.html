@@ -5,83 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>电影语音翻译</title>
 <style>
-  :root {
-    --bg: #09090b; --card: #18181b; --border: #27272a;
-    --accent: #8b5cf6; --accent2: #a78bfa; --danger: #ef4444;
-    --text: #f4f4f5; --muted: #a1a1aa;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    background: var(--bg); color: var(--text); min-height: 100vh;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none; -webkit-user-select: none;
-  }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
-
-  .lang-btn {
-    display: flex; align-items: center; gap: 10px;
-    width: 100%; padding: 14px 16px; border-radius: 14px;
-    cursor: pointer; transition: all 0.2s;
-    border: 2px solid var(--border);
-    background: transparent; color: var(--text);
-    font-size: 0.9rem; text-align: left; font-family: inherit;
-  }
-  .lang-btn:hover { border-color: var(--accent2); }
-  .lang-btn.active { border-color: var(--accent); background: rgba(139,92,246,0.1); }
-  .lang-btn .emoji { font-size: 1.4rem; }
-  .lang-btn .title { font-weight: 600; display: block; }
-  .lang-btn .sub { font-size: 0.75rem; color: var(--muted); display: block; margin-top: 2px; }
-
-  .main-btn {
-    width: 100%; padding: 18px 24px; border-radius: 100px;
-    border: none; cursor: pointer; font-weight: 700; font-size: 1rem;
-    transition: all 0.3s ease; letter-spacing: 0.03em;
-    background: var(--accent); color: white;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    font-family: inherit; -webkit-appearance: none;
-  }
-  .main-btn:active { transform: scale(0.97); }
-  .main-btn.recording { background: var(--danger); }
-
-  .status-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 16px; border-radius: 14px; background: rgba(0,0,0,0.3);
-  }
-  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .dot.idle { background: var(--muted); }
-  .dot.listening { background: #22c55e; }
-  .dot.translating { background: #f59e0b; }
-  .dot.speaking { background: #8b5cf6; }
-  .dot.error { background: var(--danger); }
-
-  .waves { display: flex; align-items: flex-end; gap: 2px; height: 28px; margin-left: auto; }
-  .waves .w { width: 3px; background: var(--accent2); border-radius: 2px; opacity: 0.7; }
-
-  .log-panel {
-    max-height: 160px; overflow-y: auto; -webkit-overflow-scrolling: touch;
-    font-family: 'SF Mono', 'Consolas', monospace; font-size: 0.7rem;
-    color: var(--muted); line-height: 1.6;
-  }
-  .log-panel .ok { color: #4ade80; }
-  .log-panel .err { color: #f87171; }
-  .log-panel .info { color: #60a5fa; }
-
-  .test-btn {
-    width: 100%; padding: 12px; border-radius: 14px;
-    border: 1px dashed var(--border); background: transparent;
-    color: var(--muted); cursor: pointer; font-size: 0.85rem;
-    transition: all 0.2s; font-family: inherit; -webkit-appearance: none;
-  }
-  .test-btn:active { border-color: var(--accent2); color: var(--accent2); }
-
-  .pulse {
-    animation: p 2s ease-in-out infinite;
-  }
-  @keyframes p {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
-    50% { box-shadow: 0 0 0 16px rgba(239,68,68,0); }
-  }
+  :root{--bg:#09090b;--card:#18181b;--border:#27272a;--accent:#8b5cf6;--accent2:#a78bfa;--danger:#ef4444;--text:#f4f4f5;--muted:#a1a1aa}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px}
+  .lang-btn{display:flex;align-items:center;gap:10px;width:100%;padding:14px 16px;border-radius:14px;cursor:pointer;transition:all .2s;border:2px solid var(--border);background:0 0;color:var(--text);font-size:.9rem;text-align:left;font-family:inherit}
+  .lang-btn:active,.lang-btn.active{border-color:var(--accent);background:rgba(139,92,246,.1)}
+  .lang-btn .emoji{font-size:1.4rem}
+  .lang-btn .title{font-weight:600;display:block}
+  .lang-btn .sub{font-size:.75rem;color:var(--muted);display:block;margin-top:2px}
+  .main-btn{width:100%;padding:18px 24px;border-radius:100px;border:none;cursor:pointer;font-weight:700;font-size:1rem;transition:all .3s;letter-spacing:.03em;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;-webkit-appearance:none}
+  .main-btn:active{transform:scale(.97)}
+  .main-btn.rec{background:var(--danger)}
+  .pulse{animation:p 2s ease-in-out infinite}
+  @keyframes p{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 16px rgba(239,68,68,0)}}
+  .status-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:rgba(0,0,0,.3)}
+  .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .dot.idle{background:var(--muted)}.dot.listening{background:#22c55e}.dot.translating{background:#f59e0b}.dot.speaking{background:#8b5cf6}.dot.error{background:var(--danger)}
+  .waves{display:flex;align-items:flex-end;gap:2px;height:28px;margin-left:auto}
+  .waves .w{width:3px;background:var(--accent2);border-radius:2px;opacity:.7}
+  .log-panel{max-height:160px;overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:'SF Mono',Consolas,monospace;font-size:.68rem;color:var(--muted);line-height:1.6}
+  .ok{color:#4ade80}.err{color:#f87171}.info{color:#60a5fa}
+  .test-btn{width:100%;padding:12px;border-radius:14px;border:1px dashed var(--border);background:0 0;color:var(--muted);cursor:pointer;font-size:.85rem;transition:all .2s;font-family:inherit;-webkit-appearance:none}
+  .test-btn:active{border-color:var(--accent2);color:var(--accent2)}
 </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
@@ -94,19 +40,15 @@
   </div>
 
   <div class="card space-y-4 mb-4">
-    <!-- Language -->
     <div class="grid grid-cols-2 gap-3">
-      <button class="lang-btn active" onclick="pick('ug', this)" id="btn-ug">
-        <span class="emoji">🏴</span>
-        <span><span class="title">维吾尔语</span><span class="sub">Uyghur</span></span>
+      <button class="lang-btn active" onclick="pick('ug',this)" id="btn-ug">
+        <span class="emoji">🏴</span><span><span class="title">维吾尔语</span><span class="sub">Uyghur</span></span>
       </button>
-      <button class="lang-btn" onclick="pick('uz', this)" id="btn-uz">
-        <span class="emoji">🇺🇿</span>
-        <span><span class="title">乌兹别克语</span><span class="sub">Uzbek</span></span>
+      <button class="lang-btn" onclick="pick('uz',this)" id="btn-uz">
+        <span class="emoji">🇺🇿</span><span><span class="title">乌兹别克语</span><span class="sub">Uzbek</span></span>
       </button>
     </div>
 
-    <!-- Status -->
     <div class="status-row">
       <span class="dot idle" id="dot"></span>
       <div class="min-w-0 flex-1">
@@ -116,279 +58,257 @@
       <div class="waves" id="waves"></div>
     </div>
 
-    <!-- Main Button -->
     <button class="main-btn" id="mb" onclick="toggle()">
-      <span id="mbIcon" style="font-size:1.2rem;">🎤</span>
+      <span id="mbIcon" style="font-size:1.2rem">🎤</span>
       <span id="mbText">开始监听</span>
     </button>
 
-    <!-- Test -->
     <button class="test-btn" onclick="testAudio()">🔊 测试音频播放</button>
-
-    <!-- Log -->
     <div class="log-panel" id="log"></div>
   </div>
-
   <p class="text-xs text-[var(--muted)] text-center">💡 戴耳机 → 麦克风靠近耳机 → 说话即可翻译</p>
 </div>
 
 <script>
-// ── State ──
-let lang = 'ug', active = false, rec = null, queue = [], speaking = false;
-const L = (m, c) => {
-  const el = document.getElementById('log');
-  const t = new Date().toLocaleTimeString('zh-CN', { hour12: false });
-  el.innerHTML += `<div class="${c||''}">${t} ${m}</div>`;
-  el.scrollTop = el.scrollHeight;
-  while (el.children.length > 40) el.firstChild.remove();
-};
+let lang='ug',active=!1,rec=null,queue=[],speaking=!1;
+const log=(m,c)=>{let e=document.getElementById('log'),t=new Date;t=t.toLocaleTimeString('zh-CN',{hour12:!1});e.innerHTML+=`<div class="${c||''}">${t} ${m}</div>`;e.scrollTop=e.scrollHeight;for(;e.children.length>40;)e.firstChild.remove()};
+function pick(l,e){lang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));e.classList.add('active');log(`语言: ${l==='ug'?'维吾尔语':'乌兹别克语'}`,'info')}
+function S(s,t,d){document.getElementById('dot').className='dot '+s;document.getElementById('st').textContent=t;document.getElementById('sd').textContent=d||'';let c=document.getElementById('waves');if(s==='idle'){c.innerHTML='';return}c.innerHTML=Array.from({length:10},()=>'<div class="w"></div>').join('');if(s==='listening'){(function loop(){if(!active){c.innerHTML='';return}c.querySelectorAll('.w').forEach(w=>w.style.height=(5+Math.random()*20)+'px');requestAnimationFrame(()=>setTimeout(loop,70))})()}}
 
-// ── Lang ──
-function pick(l, el) {
-  lang = l;
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  L(`语言: ${l==='ug'?'维吾尔语':'乌兹别克语'}`, 'info');
-}
+// ═══ TTS ═══
+async function speak(text){
+  log(`🔊 合成: "${text.slice(0,35)}..."`,'info');
 
-// ── Status ──
-function S(state, title, desc) {
-  document.getElementById('dot').className = 'dot ' + state;
-  document.getElementById('st').textContent = title;
-  document.getElementById('sd').textContent = desc || '';
-  const c = document.getElementById('waves');
-  if (state === 'idle') { c.innerHTML = ''; return; }
-  const n = 10;
-  c.innerHTML = Array.from({length: n}, () => '<div class="w"></div>').join('');
-  if (state === 'listening') {
-    const loop = () => {
-      if (!active) { c.innerHTML = ''; return; }
-      c.querySelectorAll('.w').forEach(w => {
-        w.style.height = (5 + Math.random() * 20) + 'px';
-      });
-      requestAnimationFrame(() => setTimeout(loop, 70));
-    };
-    loop();
+  if(lang==='ug'){
+    // ── UYGHUR: try multiple backends ──
+
+    // 1. Google TTS via corsproxy (reliable, free)
+    let ok = await tryGoogleViaProxy(text,'ug');
+    if(ok){log('✓ Google TTS (代理)','ok');return;}
+
+    // 2. Google TTS direct
+    ok = await tryGoogleDirect(text,'ug');
+    if(ok){log('✓ Google TTS (直连)','ok');return;}
+
+    // 3. Baidu TTS API (free, works in China)
+    ok = await tryBaiduTTS(text,'ug');
+    if(ok){log('✓ 百度 TTS','ok');return;}
+
+    // 4. Edge TTS with Arabic voice (similar script to Uyghur)
+    ok = await tryEdgeTTS(text,'ar-SA');
+    if(ok){log('✓ Edge TTS (阿拉伯语)','ok');return;}
+
+    // 5. Browser TTS with Arabic voice
+    ok = await tryBrowserTTS(text,'ar');
+    if(ok){log('✓ 浏览器 TTS','ok');return;}
+
+  } else {
+    // ── UZBEK: Edge TTS has native support ──
+
+    // 1. Edge TTS with Uzbek neural voices
+    let ok = await tryEdgeTTS(text,'uz-UZ');
+    if(ok){log('✓ Edge TTS (乌兹别克语)','ok');return;}
+
+    // 2. Google TTS via proxy
+    ok = await tryGoogleViaProxy(text,'uz');
+    if(ok){log('✓ Google TTS (代理)','ok');return;}
+
+    // 3. Google direct
+    ok = await tryGoogleDirect(text,'uz');
+    if(ok){log('✓ Google TTS (直连)','ok');return;}
+
+    // 4. Browser TTS
+    ok = await tryBrowserTTS(text,'uz');
+    if(ok){log('✓ 浏览器 TTS','ok');return;}
   }
+
+  log('❌ 所有语音方案均失败','err');
 }
 
-// ── MICROSOFT EDGE TTS (free, works in China, supports Uyghur & Uzbek) ──
-async function speak(text) {
-  L(`🔊 合成语音: "${text.slice(0,30)}..."`, 'info');
+// ── Google TTS via CORS proxy ──
+async function tryGoogleViaProxy(text,tl){
+  const proxies = [
+    'https://corsproxy.io/?',
+    'https://api.allorigins.win/raw?url=',
+    'https://cors-anywhere.herokuapp.com/',
+  ];
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${tl}&q=${encodeURIComponent(text)}`;
 
-  // Edge neural voices: best quality, free, accessible from China
-  const voiceName = lang === 'ug' ? 'ug-CN-UyghurNeural' : 'uz-UZ-MadinaNeural';
-  const voiceLang = lang === 'ug' ? 'ug-CN' : 'uz-UZ';
-
-  // Try primary SSML voices
-  const names = lang === 'ug'
-    ? ['ug-CN-UyghurNeural', 'ug-CN']
-    : ['uz-UZ-MadinaNeural', 'uz-UZ-SardorNeural', 'uz-UZ'];
-
-  for (const name of names) {
-    try {
-      const ssml = `<speak version='1.0' xml:lang='${voiceLang}'><voice xml:lang='${voiceLang}' name='${name}'>${esc(text)}</voice></speak>`;
-      const resp = await fetch(
-        'https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'audio-24khz-48kbitrate-mono-mp3' },
-          body: ssml,
-          signal: AbortSignal.timeout(10000),
-        }
-      );
-      if (resp.ok) {
-        const blob = await resp.blob();
-        if (blob.size > 300) {
-          await playAudio(blob);
-          L(`✓ 语音播放完成 (${name})`, 'ok');
-          return;
-        }
+  for(const proxy of proxies){
+    try{
+      const r = await fetch(proxy+encodeURIComponent(url), {signal:AbortSignal.timeout(12000)});
+      if(r.ok){
+        const blob = await r.blob();
+        if(blob.size > 500) return await playBlob(blob);
       }
-    } catch(e) { /* next name */ }
+    }catch(e){/*next*/}
   }
-
-  // Fallback: browser SpeechSynthesis
-  L('Edge TTS 不可用，尝试浏览器内置语音...', 'info');
-  try {
-    await browserSpeak(text);
-    L('✓ 浏览器语音播放完成', 'ok');
-    return;
-  } catch(e) {
-    L(`浏览器语音失败: ${e.message}`, 'err');
-  }
-  L('❌ 所有语音方案均失败', 'err');
+  return false;
 }
 
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+// ── Google TTS direct ──
+async function tryGoogleDirect(text,tl){
+  const urls = [
+    `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${tl}&q=${encodeURIComponent(text)}`,
+    `https://translate.google.cn/translate_tts?ie=UTF-8&client=tw-ob&tl=${tl}&q=${encodeURIComponent(text)}`,
+  ];
+  for(const url of urls){
+    try{
+      const r = await fetch(url, {signal:AbortSignal.timeout(8000)});
+      if(r.ok){const blob=await r.blob(); if(blob.size>500)return await playBlob(blob);}
+    }catch(e){/*next*/}
+  }
+  return false;
+}
 
-function playAudio(blob) {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(blob);
-    const a = new Audio(url);
-    a.onended = () => { URL.revokeObjectURL(url); resolve(); };
-    a.onerror = (e) => {
-      URL.revokeObjectURL(url);
-      // Try alternative: decode+play via AudioContext
-      const ctx = new (window.AudioContext||window.webkitAudioContext)();
-      blob.arrayBuffer().then(buf => ctx.decodeAudioData(buf)).then(buf => {
-        const src = ctx.createBufferSource();
-        src.buffer = buf; src.connect(ctx.destination);
-        src.onended = resolve;
-        src.start();
-      }).catch(() => reject(new Error('playback failed')));
+// ── Baidu TTS (free, no key needed for some endpoints) ──
+async function tryBaiduTTS(text,tl){
+  const baiduLang = tl==='ug'?'uy':'uz';
+  try{
+    // Baidu translate public TTS
+    const url = `https://fanyi.baidu.com/gettts?lan=${baiduLang}&text=${encodeURIComponent(text)}&spd=3&source=web`;
+    const r = await fetch(url, {signal:AbortSignal.timeout(10000)});
+    if(r.ok){const blob=await r.blob(); if(blob.size>300)return await playBlob(blob);}
+  }catch(e){/*next*/}
+
+  // Alternative Baidu TTS format
+  try{
+    const url = `https://fanyi.baidu.com/gettts?lan=${baiduLang}&text=${encodeURIComponent(text)}&spd=2`;
+    const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`, {signal:AbortSignal.timeout(10000)});
+    if(r.ok){const blob=await r.blob(); if(blob.size>300)return await playBlob(blob);}
+  }catch(e){}
+  return false;
+}
+
+// ── Microsoft Edge TTS ──
+async function tryEdgeTTS(text,voiceLang){
+  const names = {
+    'uz-UZ': ['uz-UZ-MadinaNeural','uz-UZ-SardorNeural','uz-UZ'],
+    'ar-SA': ['ar-SA-HamedNeural','ar-SA-ZariyahNeural','ar-SA'],
+  };
+  const nlist = names[voiceLang] || [voiceLang];
+
+  for(const name of nlist){
+    try{
+      const ssml = `<speak version='1.0' xml:lang='${voiceLang}'><voice xml:lang='${voiceLang}' name='${name}'>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</voice></speak>`;
+      const r = await fetch('https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4',{
+        method:'POST',
+        headers:{'Content-Type':'application/ssml+xml','X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3'},
+        body:ssml,
+        signal:AbortSignal.timeout(10000)
+      });
+      if(r.ok){const blob=await r.blob(); if(blob.size>300)return await playBlob(blob);}
+    }catch(e){/*next*/}
+  }
+  return false;
+}
+
+// ── Browser SpeechSynthesis ──
+function tryBrowserTTS(text,tl){
+  return new Promise(resolve=>{
+    const synth=window.speechSynthesis;
+    if(!synth)return resolve(false);
+    const go=()=>{
+      const voices=synth.getVoices();
+      if(!voices.length)return resolve(false);
+      const v=voices.find(x=>x.lang.startsWith(tl))||voices.find(x=>x.lang.startsWith('ar'))||voices.find(x=>x.lang.includes('zh'))||voices[0];
+      const u=new SpeechSynthesisUtterance(text);
+      u.voice=v;u.rate=.9;u.pitch=1;u.volume=1;
+      u.onend=()=>resolve(true);
+      u.onerror=()=>resolve(false);
+      synth.speak(u);
     };
-    a.play().catch(() => reject(new Error('autoplay blocked')));
+    if(synth.getVoices().length)go();else synth.onvoiceschanged=go;
   });
 }
 
-function browserSpeak(text) {
-  return new Promise((resolve, reject) => {
-    const synth = window.speechSynthesis;
-    if (!synth) return reject(new Error('no SpeechSynthesis'));
-    const doIt = () => {
-      const voices = synth.getVoices();
-      if (!voices.length) return reject(new Error('no voices'));
-      const v = voices.find(x => x.lang.startsWith(lang)) ||
-                voices.find(x => x.lang.includes('zh')) ||
-                voices[0];
-      const u = new SpeechSynthesisUtterance(text);
-      u.voice = v; u.rate = 0.9; u.pitch = 1; u.volume = 1;
-      u.onend = resolve;
-      u.onerror = e => reject(new Error(e.error));
-      synth.speak(u);
+// ── Audio playback ──
+function playBlob(blob){
+  return new Promise(resolve=>{
+    const url=URL.createObjectURL(blob);
+    const a=new Audio(url);
+    a.onended=()=>{URL.revokeObjectURL(url);resolve(true)};
+    a.onerror=()=>{
+      URL.revokeObjectURL(url);
+      const ctx=new(window.AudioContext||window.webkitAudioContext)();
+      blob.arrayBuffer().then(b=>ctx.decodeAudioData(b)).then(b=>{
+        const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);
+        s.onended=()=>resolve(true);s.start();
+      }).catch(()=>resolve(false));
     };
-    if (synth.getVoices().length) doIt();
-    else synth.onvoiceschanged = doIt;
+    a.play().catch(()=>resolve(false));
   });
 }
 
 // ── Test ──
-async function testAudio() {
-  L('🔈 音频测试开始...', 'info');
-  const t = lang === 'ug' ? 'ياخشىمۇسىز، بۇ بىر سىناق' : "Salom, bu test audio";
-  try { await speak(t); L('✅ 测试成功!', 'ok'); }
-  catch(e) { L(`❌ 测试失败: ${e.message}`, 'err'); }
+async function testAudio(){
+  log('🔈 音频测试...','info');
+  const t=lang==='ug'?'ياخشىمۇسىز، بۇ سىناق':'Salom, bu sinov';
+  await speak(t);
 }
 
-// ── Translate ──
-async function tr(text) {
-  L(`📝 翻译: "${text.slice(0,30)}..."`);
-  const urls = lang === 'ug'
-    ? [
-        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=ug&dt=t&q=${encodeURIComponent(text)}`,
-        `https://translate.google.cn/translate_a/single?client=gtx&sl=zh-CN&tl=ug&dt=t&q=${encodeURIComponent(text)}`,
-      ]
-    : [
-        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=uz&dt=t&q=${encodeURIComponent(text)}`,
-        `https://translate.google.cn/translate_a/single?client=gtx&sl=zh-CN&tl=uz&dt=t&q=${encodeURIComponent(text)}`,
-      ];
-
-  for (const url of urls) {
-    try {
-      const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
-      const d = await r.json();
-      if (d?.[0]) {
-        const result = d[0].map(p => p[0]).join('');
-        L(`✓ 翻译: "${result.slice(0,40)}..."`, 'ok');
-        return result;
-      }
-    } catch(e) { /* next */ }
+// ═══ TRANSLATE ═══
+async function tr(text){
+  log(`📝 翻译: "${text.slice(0,35)}..."`);
+  const urls=[
+    `https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=${lang}&dt=t&q=${encodeURIComponent(text)}`,
+    `https://translate.google.cn/translate_a/single?client=gtx&sl=zh-CN&tl=${lang}&dt=t&q=${encodeURIComponent(text)}`,
+  ];
+  for(const url of urls){
+    try{
+      const r=await fetch(url,{signal:AbortSignal.timeout(8000)});
+      const d=await r.json();
+      if(d?.[0]){const t=d[0].map(p=>p[0]).join('');log(`✓ 翻译: "${t.slice(0,40)}..."`,'ok');return t}
+    }catch(e){}
   }
-
-  // MyMemory fallback
-  try {
-    const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=zh|${lang}`, { signal: AbortSignal.timeout(6000) });
-    const d = await r.json();
-    if (d?.responseData?.translatedText) {
-      L(`✓ MyMemory: "${d.responseData.translatedText.slice(0,40)}..."`, 'ok');
-      return d.responseData.translatedText;
-    }
-  } catch(e) {}
-
-  L('❌ 所有翻译后端不可用', 'err');
-  return null;
+  try{
+    const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=zh|${lang}`,{signal:AbortSignal.timeout(6000)});
+    const d=await r.json();
+    if(d?.responseData?.translatedText){const t=d.responseData.translatedText;log(`✓ MyMemory: "${t.slice(0,40)}..."`,'ok');return t}
+  }catch(e){}
+  log('❌ 翻译失败','err');return null;
 }
 
-// ── Queue ──
-async function flush() {
-  if (speaking || !queue.length) return;
-  speaking = true;
-  const text = queue.shift();
-  S('speaking', '播放翻译中...');
-  await speak(text);
-  speaking = false;
-  if (queue.length) flush();
-  else if (active) S('listening', '监听中...', '等待语音输入');
-  else S('idle', '就绪');
+// ═══ QUEUE ═══
+async function flush(){
+  if(speaking||!queue.length)return;
+  speaking=!0;const t=queue.shift();
+  S('speaking','播放中...');await speak(t);speaking=!1;
+  if(queue.length)flush();else if(active)S('listening','监听中...','等待语音');else S('idle','就绪');
 }
 
-// ── Recognition ──
-function toggle() {
-  if (active) { stop(); return; }
-  start();
-}
-
-function start() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { L('❌ 浏览器不支持语音识别，请用 Chrome/Edge', 'err'); alert('请使用 Chrome 或 Edge 浏览器'); return; }
-
-  rec = new SR();
-  rec.lang = 'zh-CN';
-  rec.continuous = true;
-  rec.interimResults = true;
-  rec.maxAlternatives = 1;
-
-  rec.onresult = async e => {
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (!e.results[i].isFinal) continue;
-      const text = e.results[i][0].transcript.trim();
-      if (text.length < 2) continue;
-      L(`🎤 识别: "${text}"`);
-      S('translating', '翻译中...', text.slice(0, 30) + (text.length > 30 ? '…' : ''));
-      const r = await tr(text);
-      if (r) { queue.push(r); flush(); }
-      else if (active) S('listening', '监听中...', '翻译失败，重试中');
+// ═══ RECOGNITION ═══
+function toggle(){active?stop():start()}
+function start(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){log('❌ 请用Chrome/Edge','err');return}
+  rec=new SR;rec.lang='zh-CN';rec.continuous=!0;rec.interimResults=!0;rec.maxAlternatives=1;
+  rec.onresult=async e=>{
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(!e.results[i].isFinal)continue;
+      const t=e.results[i][0].transcript.trim();
+      if(t.length<2)continue;
+      log(`🎤 "${t}"`);S('translating','翻译中...');
+      const r=await tr(t);if(r){queue.push(r);flush();}else if(active)S('listening','监听中...');
     }
   };
-
-  rec.onerror = e => {
-    if (e.error === 'no-speech') { if (active) S('listening', '监听中...'); return; }
-    if (e.error === 'aborted') return;
-    if (e.error === 'not-allowed') { L('❌ 麦克风权限被拒绝!', 'err'); stop(); return; }
-    L(`⚠ 识别错误: ${e.error}`, 'err');
-  };
-
-  rec.onend = () => { if (active) setTimeout(() => { if (active) try { rec.start(); } catch(_){} }, 200); };
-
-  rec.start();
-  active = true;
-  document.getElementById('mb').classList.add('recording', 'pulse');
-  document.getElementById('mbIcon').textContent = '⏹';
-  document.getElementById('mbText').textContent = '停止翻译';
-  S('listening', '监听中...', '请说话');
-  L('🎤 开始监听', 'ok');
+  rec.onerror=e=>{if(e.error==='no-speech'){if(active)S('listening','监听中...');return}if(e.error==='aborted')return;if(e.error==='not-allowed'){log('❌ 麦克风权限被拒','err');stop();return}log(`⚠ ${e.error}`,'err')};
+  rec.onend=()=>{if(active)setTimeout(()=>{if(active)try{rec.start()}catch(_){}},200)};
+  rec.start();active=!0;
+  document.getElementById('mb').classList.add('rec','pulse');
+  document.getElementById('mbIcon').textContent='⏹';
+  document.getElementById('mbText').textContent='停止翻译';
+  S('listening','监听中...','请说话');log('🎤 开始监听','ok');
 }
-
-function stop() {
-  active = false;
-  if (rec) { rec.stop(); rec = null; }
-  queue = []; speaking = false;
+function stop(){
+  active=!1;if(rec){rec.stop();rec=null}queue=[];speaking=!1;
   window.speechSynthesis?.cancel();
-  const mb = document.getElementById('mb');
-  mb.classList.remove('recording', 'pulse');
-  document.getElementById('mbIcon').textContent = '🎤';
-  document.getElementById('mbText').textContent = '开始监听';
-  S('idle', '已停止');
-  document.getElementById('waves').innerHTML = '';
-  L('⏹ 已停止');
+  document.getElementById('mb').classList.remove('rec','pulse');
+  document.getElementById('mbIcon').textContent='🎤';
+  document.getElementById('mbText').textContent='开始监听';
+  S('idle','已停止');document.getElementById('waves').innerHTML='';log('⏹ 已停止');
 }
-
-// Preload voices
-if (window.speechSynthesis) {
-  speechSynthesis.getVoices();
-  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
-}
+if(window.speechSynthesis){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices()}
 </script>
 </body>
 </html>
