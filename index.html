@@ -28,7 +28,7 @@
   .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
   .dot.idle{background:var(--muted)}.dot.listening{background:#22c55e}.dot.translating{background:#f59e0b}.dot.speaking{background:#8b5cf6}
 
-  .log-panel{max-height:100px;overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:monospace;font-size:.6rem;color:var(--muted);line-height:1.5;background:rgba(0,0,0,.2);border-radius:10px;padding:8px 10px}
+  .log-panel{max-height:120px;overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:monospace;font-size:.6rem;color:var(--muted);line-height:1.5;background:rgba(0,0,0,.2);border-radius:10px;padding:8px 10px}
   .ok{color:#4ade80}.err{color:#f87171}.warn{color:#f59e0b}
 
   .row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(0,0,0,.25)}
@@ -62,13 +62,13 @@
       <span class="text-xs text-[var(--muted)]" id="sd"></span>
     </div>
 
-    <!-- TEXT INPUT (works everywhere) -->
+    <!-- TEXT INPUT (always works) -->
     <div class="flex gap-2">
-      <input type="text" class="text-input flex-1" id="ti" placeholder="输入你听到的中文台词..." autocomplete="off">
+      <input type="text" class="text-input flex-1" id="ti" placeholder="输入你听到的中文..." autocomplete="off">
       <button class="main-btn" style="width:auto;padding:12px 18px;white-space:nowrap" onclick="sendText()">📤 翻译</button>
     </div>
 
-    <!-- VOICE (Chrome/Edge only) -->
+    <!-- VOICE (Chrome/Edge on Android) -->
     <button class="main-btn" id="mb" onclick="toggle()"><span>🎤</span><span id="mbt">语音监听 (Chrome)</span></button>
 
     <!-- SUBTITLE -->
@@ -78,24 +78,23 @@
     </div>
 
     <!-- Tests -->
-    <button class="test-btn" onclick="testBeep()">🔔 蜂鸣测试（检测设备能否发声）</button>
-    <button class="test-btn" onclick="testAudio()">🔊 测试语音翻译</button>
+    <button class="test-btn" onclick="testBeep()">🔔 蜂鸣测试</button>
+    <button class="test-btn" onclick="testAudio()">🔊 测试完整翻译+朗读</button>
 
     <!-- Log -->
     <div class="log-panel" id="log"></div>
   </div>
-  <p class="text-[10px] text-[var(--muted)] text-center">打字输入 → 翻译朗读 · 语音监听仅 Chrome/Edge 支持</p>
+  <p class="text-[10px] text-[var(--muted)] text-center">打字输入 100% 可用 · 语音监听仅 Chrome/Edge 支持</p>
 </div>
 
 <script>
 // ═══ STATE ═══
-let lang='ug', active=!1, rec=null, queue=[], busy=!1;
-let audioCtx=null; // Reusable AudioContext (created on user gesture)
+let lang='ug', active=!1, rec=null, queue=[], busy=!1, audioCtx=null;
 
 // ═══ LOG ═══
 const L=(m,c)=>{let e=document.getElementById('log'),t=new Date;t=t.toLocaleTimeString('zh-CN',{hour12:!1});e.innerHTML+=`<div class="${c||''}">${t} ${m}</div>`;e.scrollTop=e.scrollHeight;for(;e.children.length>35;)e.firstChild.remove()};
 
-// ═══ Get or create AudioContext (must be done in user gesture for iOS) ═══
+// ═══ AudioContext ═══
 function getAC(){
   if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
   if(audioCtx.state==='suspended') audioCtx.resume();
@@ -104,7 +103,6 @@ function getAC(){
 
 // ═══ LANG ═══
 function pick(l,e){lang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));e.classList.add('active');L('语言: '+(l==='ug'?'维吾尔语':'乌兹别克语'))}
-
 function SS(s,m){document.getElementById('dot').className='dot '+s;document.getElementById('st').textContent=m}
 function sub(orig,trans){document.getElementById('origTxt').textContent=orig||'';document.getElementById('transTxt').textContent=trans||''}
 
@@ -118,13 +116,8 @@ async function sendText(){
   sub(text,'⏳ 翻译中...');
   SS('translating','翻译中');
   const r=await tr(text);
-  if(r){
-    queue.push(r);
-    flush();
-  }
+  if(r){queue.push(r);flush();}
 }
-
-// Input Enter key
 document.getElementById('ti').addEventListener('keydown',e=>{if(e.key==='Enter') sendText()});
 
 // ═══ BEEP TEST ═══
@@ -136,69 +129,54 @@ function testBeep(){
     osc.connect(gain);gain.connect(ctx.destination);
     osc.frequency.value=440;gain.gain.value=.3;
     osc.start();osc.stop(ctx.currentTime+.5);
-    L('✅ 蜂鸣播放中！','ok');
-    setTimeout(()=>L('如果没听到 → 检查静音开关和音量','warn'),600);
+    L('✅ 蜂鸣播放中！听不到请检查音量/静音','ok');
   }catch(e){L('❌ 蜂鸣失败: '+e.message,'err');}
 }
 
-// ═══ TTS ═══
-async function speak(text){
-  L('🔊 合成: "'+text.slice(0,35)+'..."');
-  SS('speaking','朗读中');
-
-  if(lang==='ug'){
-    // 1. Edge TTS ar-SA
-    for(const v of ['ar-SA-HamedNeural','ar-SA-ZariyahNeural','ar-SA']){
-      if(await edgeTTS(text,v,'ar-SA')){sub('',text);return}
+// ═══ BAIDU TTS (free, no API key, works in China) ═══
+async function baiduTTS(text, lan){
+  // Baidu fanyi free TTS endpoint
+  // Language codes: zh en ara jp kor fra spa ru de pt it tr th vie yue cht wyw
+  const url='https://fanyi.baidu.com/gettts?lan='+lan+'&text='+encodeURIComponent(text)+'&spd=3&source=web';
+  try{
+    L('  尝试百度TTS lan='+lan,'warn');
+    const r=await fetch(url,{signal:AbortSignal.timeout(10000)});
+    if(r.ok){
+      const b=await r.blob();
+      if(b.size>500){
+        L('  百度TTS ✓ size='+b.size,'ok');
+        return await play(b);
+      } else {
+        L('  百度TTS 响应为空','warn');
+      }
+    } else {
+      L('  百度TTS HTTP '+r.status,'warn');
     }
-    // 2. Google via CORS proxy
-    for(const px of ['https://corsproxy.io/?','https://api.allorigins.win/raw?url=']){
-      if(await googleViaProxy(text,'ug',px)){sub('',text);return}
-    }
-    // 3. Google direct
-    if(await googleDirect(text,'ug')){sub('',text);return}
-    // 4. Browser TTS ar
-    if(await browserTTS(text,'ar')){sub('',text);return}
-  } else {
-    // Uzbek
-    for(const v of ['uz-UZ-MadinaNeural','uz-UZ-SardorNeural','uz-UZ']){
-      if(await edgeTTS(text,v,'uz-UZ')){sub('',text);return}
-    }
-    for(const px of ['https://corsproxy.io/?','https://api.allorigins.win/raw?url=']){
-      if(await googleViaProxy(text,'uz',px)){sub('',text);return}
-    }
-    if(await googleDirect(text,'uz')){sub('',text);return}
-    if(await browserTTS(text,'uz')){sub('',text);return}
-  }
-
-  L('⚠ 语音合成未成功，字幕已显示','warn');
-  sub('',text);
+  }catch(e){L('  百度TTS 异常: '+e.message,'warn')}
+  return !1;
 }
 
-// ═══ Edge TTS ═══
+// ═══ EDGE TTS ═══
 async function edgeTTS(text,voiceName,voiceLang){
   try{
     const ssml='<speak version="1.0" xml:lang="'+voiceLang+'"><voice xml:lang="'+voiceLang+'" name="'+voiceName+'">'+text.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</voice></speak>';
     const r=await fetch('https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4',{
       method:'POST',headers:{'Content-Type':'application/ssml+xml','X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3'},body:ssml,signal:AbortSignal.timeout(10000)
     });
-    if(r.ok){const b=await r.blob();if(b.size>300){L('  Edge ✓ '+voiceName,'ok');return await play(b)}else{L('  Edge 空响应: '+voiceName,'warn')}}
-    else{L('  Edge HTTP '+r.status+' : '+voiceName,'warn')}
-  }catch(e){L('  Edge 异常: '+e.message,'warn')}
-  return !1;
-}
-
-// ═══ Google via proxy ═══
-async function googleViaProxy(text,tl,proxy){
-  const url='https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl='+tl+'&q='+encodeURIComponent(text);
-  try{
-    const r=await fetch(proxy+encodeURIComponent(url),{signal:AbortSignal.timeout(12000)});
-    if(r.ok){const b=await r.blob();if(b.size>500){L('  Google代理 ✓ '+proxy.slice(0,20),'ok');return await play(b)}}
+    if(r.ok){const b=await r.blob();if(b.size>300){L('  Edge ✓ '+voiceName,'ok');return await play(b)}}
   }catch(e){}
   return !1;
 }
 
-// ═══ Google direct ═══
+// ═══ GOOGLE TTS ═══
+async function googleViaProxy(text,tl,proxy){
+  const url='https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl='+tl+'&q='+encodeURIComponent(text);
+  try{
+    const r=await fetch(proxy+encodeURIComponent(url),{signal:AbortSignal.timeout(12000)});
+    if(r.ok){const b=await r.blob();if(b.size>500){L('  Google代理 ✓','ok');return await play(b)}}
+  }catch(e){}
+  return !1;
+}
 async function googleDirect(text,tl){
   for(const url of[
     'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl='+tl+'&q='+encodeURIComponent(text),
@@ -209,7 +187,7 @@ async function googleDirect(text,tl){
   return !1;
 }
 
-// ═══ Browser TTS ═══
+// ═══ BROWSER TTS ═══
 function browserTTS(text,tl){
   return new Promise(resolve=>{
     const s=window.speechSynthesis;
@@ -220,28 +198,24 @@ function browserTTS(text,tl){
       const u=new SpeechSynthesisUtterance(text);u.voice=v;u.rate=.9;u.volume=1;
       u.onend=()=>{L('  浏览器TTS ✓ '+v.lang,'ok');resolve(!0)};
       u.onerror=()=>resolve(!1);
-      s.cancel(); // cancel any pending
-      s.speak(u);
+      s.cancel(); s.speak(u);
     };
     if(s.getVoices().length) go(); else s.onvoiceschanged=go;
   });
 }
 
-// ═══ AUDIO PLAYBACK (iOS-safe: uses AudioContext) ═══
+// ═══ PLAY (AudioContext for iOS/Android compatibility) ═══
 function play(blob){
   return new Promise(resolve=>{
-    // Skip <Audio> element on iOS — use AudioContext directly
     blob.arrayBuffer().then(buf=>{
       const ctx=getAC();
       ctx.decodeAudioData(buf).then(audioBuffer=>{
         const src=ctx.createBufferSource();
-        src.buffer=audioBuffer;
-        src.connect(ctx.destination);
+        src.buffer=audioBuffer; src.connect(ctx.destination);
         src.onended=()=>resolve(!0);
         src.start();
-        L('  ▶ 播放中...','ok');
+        L('  ▶ 播放中','ok');
       }).catch(()=>{
-        // Fallback: try <audio> element
         const u=URL.createObjectURL(blob),a=new Audio(u);
         a.onended=()=>{URL.revokeObjectURL(u);resolve(!0)};
         a.onerror=()=>{URL.revokeObjectURL(u);resolve(!1)};
@@ -251,9 +225,54 @@ function play(blob){
   });
 }
 
+// ═══ TTS CASCADE ═══
+async function speak(text){
+  L('🔊 合成: "'+text.slice(0,35)+'..."');
+  SS('speaking','朗读中');
+
+  if(lang==='ug'){
+    // ── UYGHUR ──
+    // 1. Baidu TTS with ara (Arabic — same script, works in China!)
+    if(await baiduTTS(text,'ara')){sub('',text);return}
+    // 2. Baidu TTS with uy (try Uyghur code)
+    if(await baiduTTS(text,'uy')){sub('',text);return}
+    // 3. Edge TTS ar-SA
+    for(const v of ['ar-SA-HamedNeural','ar-SA-ZariyahNeural','ar-SA']){
+      if(await edgeTTS(text,v,'ar-SA')){sub('',text);return}
+    }
+    // 4. Google via CORS proxy
+    for(const px of ['https://corsproxy.io/?','https://api.allorigins.win/raw?url=']){
+      if(await googleViaProxy(text,'ug',px)){sub('',text);return}
+    }
+    // 5. Google direct
+    if(await googleDirect(text,'ug')){sub('',text);return}
+    // 6. Browser TTS ar
+    if(await browserTTS(text,'ar')){sub('',text);return}
+  } else {
+    // ── UZBEK ──
+    // 1. Baidu TTS with tr (Turkish — same language family)
+    if(await baiduTTS(text,'tr')){sub('',text);return}
+    // 2. Edge TTS uz-UZ
+    for(const v of ['uz-UZ-MadinaNeural','uz-UZ-SardorNeural','uz-UZ']){
+      if(await edgeTTS(text,v,'uz-UZ')){sub('',text);return}
+    }
+    // 3. Google via proxy
+    for(const px of ['https://corsproxy.io/?','https://api.allorigins.win/raw?url=']){
+      if(await googleViaProxy(text,'uz',px)){sub('',text);return}
+    }
+    // 4. Google direct
+    if(await googleDirect(text,'uz')){sub('',text);return}
+    // 5. Browser TTS
+    if(await browserTTS(text,'uz')){sub('',text);return}
+  }
+
+  L('⚠ 所有语音源均失败，仅显示字幕','warn');
+  sub('',text);
+}
+
 // ═══ TEST ═══
 async function testAudio(){
-  L('🔊 语音测试...','warn');
+  L('🔊 完整测试...','warn');
   const t=lang==='ug'?'ياخشىمۇسىز':'Salom';
   sub('测试: '+t,'');
   await speak(t);
@@ -268,7 +287,6 @@ async function tr(text){
   for(const u of urls){
     try{const r=await fetch(u,{signal:AbortSignal.timeout(8000)});const d=await r.json();if(d?.[0]){const t=d[0].map(p=>p[0]).join('');L('✓ 翻译: "'+t.slice(0,35)+'..."','ok');return t}}catch(e){}
   }
-  // MyMemory fallback
   try{const r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=zh|'+lang,{signal:AbortSignal.timeout(6000)});const d=await r.json();if(d?.responseData?.translatedText) return d.responseData.translatedText}catch(e){}
   L('❌ 翻译失败','err');sub(text,'❌ 翻译失败');return null;
 }
@@ -283,17 +301,16 @@ async function flush(){
   else SS('idle','就绪 — 打字或语音输入');
 }
 
-// ═══ RECOGNITION (Chrome/Edge only) ═══
+// ═══ RECOGNITION ═══
 function toggle(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){
-    sub('','请用 Chrome/Edge 浏览器或直接打字输入');
+    sub('','请用 Chrome 浏览器或直接打字输入');
     L('❌ 浏览器不支持语音识别，请打字输入','err');
     return;
   }
   active?stop():start();
 }
-
 function start(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   rec=new SR; rec.lang='zh-CN'; rec.continuous=!0; rec.interimResults=!0; rec.maxAlternatives=1;
@@ -309,7 +326,7 @@ function start(){
   rec.onerror=e=>{
     if(e.error==='no-speech'){if(active) SS('listening','监听中');return}
     if(e.error==='aborted') return;
-    if(e.error==='not-allowed'){L('❌ 麦克风权限被拒','err');sub('','请在浏览器设置中允许麦克风');stop();return}
+    if(e.error==='not-allowed'){L('❌ 麦克风权限被拒','err');stop();return}
     L('⚠ '+e.error,'warn');
   };
   rec.onend=()=>{if(active) setTimeout(()=>{if(active) try{rec.start()}catch(_){}},200)};
@@ -318,7 +335,6 @@ function start(){
   document.getElementById('mbt').textContent='停止监听';
   SS('listening','监听中...'); sub('','🎤 请说中文...'); L('🎤 语音监听已启动','ok');
 }
-
 function stop(){
   active=!1; if(rec){rec.stop();rec=null}
   queue=[]; busy=!1; if(window.speechSynthesis) speechSynthesis.cancel();
@@ -329,11 +345,9 @@ function stop(){
 
 // ═══ INIT ═══
 if(window.speechSynthesis){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices()}
-
-// Pre-create AudioContext on first user interaction
 document.addEventListener('click',()=>getAC(),{once:!0});
 document.addEventListener('touchend',()=>getAC(),{once:!0});
-L('✅ 就绪 — 打字输入翻译，或点击语音按钮','ok');
+L('✅ 就绪 — 百度TTS优先 | 打字或语音输入','ok');
 </script>
 </body>
 </html>
