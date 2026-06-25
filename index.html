@@ -160,7 +160,7 @@ async function baiduTTS(text, lan){
 async function edgeTTS(text,voiceName,voiceLang){
   try{
     const ssml='<speak version="1.0" xml:lang="'+voiceLang+'"><voice xml:lang="'+voiceLang+'" name="'+voiceName+'">'+text.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</voice></speak>';
-    const r=await fetch('https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4',{
+    const r=await // Edge TTS replaced by Deno Deploy proxy?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4',{
       method:'POST',headers:{'Content-Type':'application/ssml+xml','X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3'},body:ssml,signal:AbortSignal.timeout(10000)
     });
     if(r.ok){const b=await r.blob();if(b.size>300){L('  Edge ✓ '+voiceName,'ok');return await play(b)}}
