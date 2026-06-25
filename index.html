@@ -3,351 +3,101 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>电影语音翻译</title>
-<style>
-  :root{--bg:#09090b;--card:#18181b;--border:#27272a;--accent:#8b5cf6;--danger:#ef4444;--text:#f4f4f5;--muted:#a1a1aa}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px}
-
-  .subtitle-bar{text-align:center;padding:12px 16px;border-radius:14px;background:rgba(0,0,0,.4);border:1px solid var(--border);min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-  .subtitle-bar .orig{font-size:.75rem;color:var(--muted)}
-  .subtitle-bar .trans{font-size:1.15rem;font-weight:700;color:#fff;word-break:break-word;line-height:1.4}
-
-  .lang-btn{display:flex;align-items:center;gap:8px;width:100%;padding:12px 14px;border-radius:12px;cursor:pointer;transition:all .2s;border:2px solid var(--border);background:0 0;color:var(--text);font-size:.85rem;text-align:left;font-family:inherit}
-  .lang-btn.active{border-color:var(--accent);background:rgba(139,92,246,.1)}
-  .lang-btn .emoji{font-size:1.3rem}
-  .lang-btn .title{font-weight:600;display:block}
-  .lang-btn .sub{font-size:.7rem;color:var(--muted)}
-
-  .main-btn{width:100%;padding:16px 24px;border-radius:100px;border:none;cursor:pointer;font-weight:700;font-size:1rem;transition:all .3s;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;-webkit-appearance:none}
-  .main-btn:active{transform:scale(.97)}
-  .main-btn.rec{background:var(--danger);animation:p 2s infinite}
-  @keyframes p{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 16px rgba(239,68,68,0)}}
-
-  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-  .dot.idle{background:var(--muted)}.dot.listening{background:#22c55e}.dot.translating{background:#f59e0b}.dot.speaking{background:#8b5cf6}
-
-  .log-panel{max-height:120px;overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:monospace;font-size:.6rem;color:var(--muted);line-height:1.5;background:rgba(0,0,0,.2);border-radius:10px;padding:8px 10px}
-  .ok{color:#4ade80}.err{color:#f87171}.warn{color:#f59e0b}
-
-  .row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(0,0,0,.25)}
-  .test-btn{width:100%;padding:10px;border-radius:12px;border:1px dashed var(--border);background:0 0;color:var(--muted);cursor:pointer;font-size:.8rem;font-family:inherit;-webkit-appearance:none}
-  .test-btn:active{border-color:var(--accent);color:#a78bfa}
-
-  .text-input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);font-size:1rem;font-family:inherit;outline:none;-webkit-appearance:none}
-  .text-input:focus{border-color:var(--accent)}
-  .text-input::placeholder{color:var(--muted)}
-</style>
+<title>维吾尔语电影翻译</title>
+<style>:root{--bg:#09090b;--card:#18181b;--border:#27272a;--accent:#8b5cf6;--danger:#ef4444;--text:#f4f4f5;--muted:#a1a1aa}*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent}.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px}.subtitle-bar{text-align:center;padding:12px 16px;border-radius:14px;background:rgba(0,0,0,.4);border:1px solid var(--border);min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}.subtitle-bar .orig{font-size:.75rem;color:var(--muted)}.subtitle-bar .trans{font-size:1.15rem;font-weight:700;color:#fff;word-break:break-word;line-height:1.4}.main-btn{width:100%;padding:16px 24px;border-radius:100px;border:none;cursor:pointer;font-weight:700;font-size:1rem;transition:all .3s;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;-webkit-appearance:none}.main-btn:active{transform:scale(.97)}.main-btn.rec{background:var(--danger);animation:p 2s infinite}@keyframes p{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 16px rgba(239,68,68,0)}}.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}.dot.idle{background:var(--muted)}.dot.listening{background:#22c55e}.dot.translating{background:#f59e0b}.dot.speaking{background:#8b5cf6}.log-panel{max-height:120px;overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:monospace;font-size:.6rem;color:var(--muted);line-height:1.5;background:rgba(0,0,0,.2);border-radius:10px;padding:8px 10px}.ok{color:#4ade80}.err{color:#f87171}.warn{color:#f59e0b}.row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(0,0,0,.25)}.test-btn{width:100%;padding:10px;border-radius:12px;border:1px dashed var(--border);background:0 0;color:var(--muted);cursor:pointer;font-size:.8rem;font-family:inherit;-webkit-appearance:none}.test-btn:active{border-color:var(--accent);color:#a78bfa}.text-input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);font-size:1rem;font-family:inherit;outline:none;-webkit-appearance:none}.text-input:focus{border-color:var(--accent)}.text-input::placeholder{color:var(--muted)}</style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
-
 <div class="w-full max-w-md mx-auto flex flex-col gap-3">
-  <div class="text-center">
-    <span class="text-2xl">🎬</span>
-    <h1 class="text-lg font-bold">电影语音翻译</h1>
-  </div>
+<div class="text-center"><span class="text-2xl">🎬</span><h1 class="text-lg font-bold">维吾尔语电影翻译</h1></div>
+<div class="card space-y-3">
 
-  <div class="card space-y-3">
-    <!-- Lang -->
-    <div class="grid grid-cols-2 gap-2">
-      <button class="lang-btn active" onclick="pick('ug',this)"><span class="emoji">🏴</span><span><span class="title">维吾尔语</span><span class="sub">Uyghur</span></span></button>
-      <button class="lang-btn" onclick="pick('uz',this)"><span class="emoji">🇺🇿</span><span><span class="title">乌兹别克语</span><span class="sub">Uzbek</span></span></button>
-    </div>
+<div class="row"><span class="dot idle" id="dot"></span><span class="text-sm flex-1" id="st">就绪 — 输入中文 → 维吾尔语朗读</span></div>
 
-    <!-- Status -->
-    <div class="row">
-      <span class="dot idle" id="dot"></span>
-      <span class="text-sm flex-1" id="st">就绪 — 打字或语音输入</span>
-      <span class="text-xs text-[var(--muted)]" id="sd"></span>
-    </div>
+<div class="flex gap-2"><input type="text" class="text-input flex-1" id="ti" placeholder="输入中文台词..." autocomplete="off"><button class="main-btn" style="width:auto;padding:12px 18px;white-space:nowrap" onclick="sendText()">📤 翻译</button></div>
 
-    <!-- TEXT INPUT (always works) -->
-    <div class="flex gap-2">
-      <input type="text" class="text-input flex-1" id="ti" placeholder="输入你听到的中文..." autocomplete="off">
-      <button class="main-btn" style="width:auto;padding:12px 18px;white-space:nowrap" onclick="sendText()">📤 翻译</button>
-    </div>
+<button class="main-btn" id="mb" onclick="toggle()"><span>🎤</span><span id="mbt">语音监听 (Chrome)</span></button>
 
-    <!-- VOICE (Chrome/Edge on Android) -->
-    <button class="main-btn" id="mb" onclick="toggle()"><span>🎤</span><span id="mbt">语音监听 (Chrome)</span></button>
+<div class="subtitle-bar"><span class="orig" id="origTxt">输入文字或按语音按钮</span><span class="trans" id="transTxt"></span></div>
 
-    <!-- SUBTITLE -->
-    <div class="subtitle-bar">
-      <span class="orig" id="origTxt">输入文字或按语音按钮</span>
-      <span class="trans" id="transTxt"></span>
-    </div>
-
-    <!-- Tests -->
-    <button class="test-btn" onclick="testBeep()">🔔 蜂鸣测试</button>
-    <button class="test-btn" onclick="testAudio()">🔊 测试完整翻译+朗读</button>
-
-    <!-- Log -->
-    <div class="log-panel" id="log"></div>
-  </div>
-  <p class="text-[10px] text-[var(--muted)] text-center">打字输入 100% 可用 · 语音监听仅 Chrome/Edge 支持</p>
+<button class="test-btn" onclick="testBeep()">🔔 蜂鸣测试</button>
+<button class="test-btn" onclick="testFull()">🔊 完整测试 (ياخشىمۇسىز)</button>
+<div class="log-panel" id="log"></div>
+</div>
+<p class="text-[10px] text-[var(--muted)] text-center">Google 翻译 + Google TTS · 维吾尔语真声 · 无需 API 密钥</p>
 </div>
 
 <script>
-// ═══ STATE ═══
-let lang='ug', active=!1, rec=null, queue=[], busy=!1, audioCtx=null;
+var queue=[],busy=!1,audioCtx=null,active=!1,rec=null;
 
-// ═══ LOG ═══
-const L=(m,c)=>{let e=document.getElementById('log'),t=new Date;t=t.toLocaleTimeString('zh-CN',{hour12:!1});e.innerHTML+=`<div class="${c||''}">${t} ${m}</div>`;e.scrollTop=e.scrollHeight;for(;e.children.length>35;)e.firstChild.remove()};
+function L(m,c){var e=document.getElementById('log'),t=new Date;t=t.toLocaleTimeString('zh-CN',{hour12:!1});e.innerHTML+='<div class="'+(c||'')+'">'+t+' '+m+'</div>';e.scrollTop=e.scrollHeight;while(e.children.length>35)e.firstChild.remove()}
 
-// ═══ AudioContext ═══
-function getAC(){
-  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  if(audioCtx.state==='suspended') audioCtx.resume();
-  return audioCtx;
-}
+function getAC(){if(!audioCtx){audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume()}return audioCtx}
 
-// ═══ LANG ═══
-function pick(l,e){lang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));e.classList.add('active');L('语言: '+(l==='ug'?'维吾尔语':'乌兹别克语'))}
 function SS(s,m){document.getElementById('dot').className='dot '+s;document.getElementById('st').textContent=m}
+
 function sub(orig,trans){document.getElementById('origTxt').textContent=orig||'';document.getElementById('transTxt').textContent=trans||''}
 
-// ═══ SEND TEXT ═══
-async function sendText(){
-  const inp=document.getElementById('ti');
-  const text=inp.value.trim();
-  if(!text) return;
-  inp.value='';
-  L('⌨ '+text);
+// ── BEEP ──
+function testBeep(){L('🔔 蜂鸣...','warn');try{var c=getAC(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=440;g.gain.value=.3;o.start();o.stop(c.currentTime+.5);L('✅ 蜂鸣播放中！','ok')}catch(e){L('❌ 蜂鸣失败','err')}}
+
+// ── TRANSLATE (Google) ──
+function tr(text){
   sub(text,'⏳ 翻译中...');
-  SS('translating','翻译中');
-  const r=await tr(text);
-  if(r){queue.push(r);flush();}
-}
-document.getElementById('ti').addEventListener('keydown',e=>{if(e.key==='Enter') sendText()});
-
-// ═══ BEEP TEST ═══
-function testBeep(){
-  L('🔔 蜂鸣测试...','warn');
-  try{
-    const ctx=getAC();
-    const osc=ctx.createOscillator();const gain=ctx.createGain();
-    osc.connect(gain);gain.connect(ctx.destination);
-    osc.frequency.value=440;gain.gain.value=.3;
-    osc.start();osc.stop(ctx.currentTime+.5);
-    L('✅ 蜂鸣播放中！听不到请检查音量/静音','ok');
-  }catch(e){L('❌ 蜂鸣失败: '+e.message,'err');}
+  var u='https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=ug&dt=t&q='+encodeURIComponent(text);
+  return fetch(u,{signal:AbortSignal.timeout(10000)}).then(function(r){return r.json()}).then(function(d){
+    if(d&&d[0]){var t=d[0].map(function(p){return p[0]}).join('');L('✓ 翻译: '+t.slice(0,35),'ok');return t}
+    throw new Error('no data');
+  }).catch(function(e){
+    L('❌ 翻译失败: '+e.message,'err');
+    sub(text,'❌ 翻译失败 - 请检查网络');
+    return null;
+  });
 }
 
-// ═══ BAIDU TTS (free, no API key, works in China) ═══
-async function baiduTTS(text, lan){
-  // Baidu fanyi free TTS endpoint
-  // Language codes: zh en ara jp kor fra spa ru de pt it tr th vie yue cht wyw
-  const url='https://fanyi.baidu.com/gettts?lan='+lan+'&text='+encodeURIComponent(text)+'&spd=3&source=web';
-  try{
-    L('  尝试百度TTS lan='+lan,'warn');
-    const r=await fetch(url,{signal:AbortSignal.timeout(10000)});
-    if(r.ok){
-      const b=await r.blob();
-      if(b.size>500){
-        L('  百度TTS ✓ size='+b.size,'ok');
-        return await play(b);
-      } else {
-        L('  百度TTS 响应为空','warn');
-      }
-    } else {
-      L('  百度TTS HTTP '+r.status,'warn');
-    }
-  }catch(e){L('  百度TTS 异常: '+e.message,'warn')}
-  return !1;
-}
-
-// ═══ EDGE TTS ═══
-async function edgeTTS(text,voiceName,voiceLang){
-  try{
-    const ssml='<speak version="1.0" xml:lang="'+voiceLang+'"><voice xml:lang="'+voiceLang+'" name="'+voiceName+'">'+text.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</voice></speak>';
-    const r=await // Edge TTS replaced by Deno Deploy proxy?TrustedClientToken=6A5AA1D4EAFF4E9FB37E23D68491D6F4',{
-      method:'POST',headers:{'Content-Type':'application/ssml+xml','X-Microsoft-OutputFormat':'audio-24khz-48kbitrate-mono-mp3'},body:ssml,signal:AbortSignal.timeout(10000)
+// ── TTS (Google) ──
+function speak(text){
+  L('🔊 TTS: '+text.slice(0,35));SS('speaking','朗读中');
+  var u='https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ug&q='+encodeURIComponent(text);
+  return fetch(u,{signal:AbortSignal.timeout(15000)}).then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.arrayBuffer();
+  }).then(function(buf){
+    if(buf.byteLength<500)throw new Error('音频太小');
+    L('  ✓ 下载 size='+buf.byteLength,'ok');
+    var ctx=getAC();
+    return ctx.decodeAudioData(buf);
+  }).then(function(ab){
+    var src=getAC().createBufferSource();src.buffer=ab;src.connect(getAC().destination);
+    return new Promise(function(resolve){
+      src.onended=function(){L('  ▶ 播放完毕','ok');sub('',text);resolve()};
+      src.start();
+      L('  ▶ 播放中','ok');
     });
-    if(r.ok){const b=await r.blob();if(b.size>300){L('  Edge ✓ '+voiceName,'ok');return await play(b)}}
-  }catch(e){}
-  return !1;
-}
-
-// ═══ GOOGLE TTS ═══
-async function googleViaProxy(text,tl,proxy){
-  const url='https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl='+tl+'&q='+encodeURIComponent(text);
-  try{
-    const r=await fetch(proxy+encodeURIComponent(url),{signal:AbortSignal.timeout(12000)});
-    if(r.ok){const b=await r.blob();if(b.size>500){L('  Google代理 ✓','ok');return await play(b)}}
-  }catch(e){}
-  return !1;
-}
-async function googleDirect(text,tl){
-  for(const url of[
-    'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl='+tl+'&q='+encodeURIComponent(text),
-    'https://translate.google.cn/translate_tts?ie=UTF-8&client=tw-ob&tl='+tl+'&q='+encodeURIComponent(text)
-  ]){
-    try{const r=await fetch(url,{signal:AbortSignal.timeout(8000)});if(r.ok){const b=await r.blob();if(b.size>500){L('  Google直接 ✓','ok');return await play(b)}}}catch(e){}
-  }
-  return !1;
-}
-
-// ═══ BROWSER TTS ═══
-function browserTTS(text,tl){
-  return new Promise(resolve=>{
-    const s=window.speechSynthesis;
-    if(!s) return resolve(!1);
-    const go=()=>{
-      const vs=s.getVoices(); if(!vs.length) return resolve(!1);
-      const v=vs.find(x=>x.lang.startsWith(tl))||vs.find(x=>x.lang.startsWith('ar'))||vs[0];
-      const u=new SpeechSynthesisUtterance(text);u.voice=v;u.rate=.9;u.volume=1;
-      u.onend=()=>{L('  浏览器TTS ✓ '+v.lang,'ok');resolve(!0)};
-      u.onerror=()=>resolve(!1);
-      s.cancel(); s.speak(u);
-    };
-    if(s.getVoices().length) go(); else s.onvoiceschanged=go;
+  }).catch(function(e){
+    L('  TTS失败: '+e.message,'err');
+    L('  ⚠ 仅显示字幕','warn');
+    sub('',text);
   });
 }
 
-// ═══ PLAY (AudioContext for iOS/Android compatibility) ═══
-function play(blob){
-  return new Promise(resolve=>{
-    blob.arrayBuffer().then(buf=>{
-      const ctx=getAC();
-      ctx.decodeAudioData(buf).then(audioBuffer=>{
-        const src=ctx.createBufferSource();
-        src.buffer=audioBuffer; src.connect(ctx.destination);
-        src.onended=()=>resolve(!0);
-        src.start();
-        L('  ▶ 播放中','ok');
-      }).catch(()=>{
-        const u=URL.createObjectURL(blob),a=new Audio(u);
-        a.onended=()=>{URL.revokeObjectURL(u);resolve(!0)};
-        a.onerror=()=>{URL.revokeObjectURL(u);resolve(!1)};
-        a.play().catch(()=>resolve(!1));
-      });
-    }).catch(()=>resolve(!1));
-  });
-}
+// ── SEND TEXT ──
+function sendText(){var inp=document.getElementById('ti'),text=inp.value.trim();if(!text)return;inp.value='';L('⌨ '+text);SS('translating','翻译中');
+  tr(text).then(function(r){if(r){queue.push(r);flush()}})}
+document.getElementById('ti').addEventListener('keydown',function(e){if(e.key==='Enter')sendText()});
 
-// ═══ TTS CASCADE ═══
-async function speak(text){
-  L('🔊 合成: "'+text.slice(0,35)+'..."');
-  SS('speaking','朗读中');
+// ── QUEUE ──
+function flush(){if(busy||!queue.length)return;busy=!0;var t=queue.shift();speak(t).then(function(){busy=!1;if(queue.length)flush();else SS('idle','就绪')})}
 
-  if(lang==='ug'){
-    // ── UYGHUR ──
-    // 1. Baidu TTS with ara (Arabic — same script, works in China!)
-    if(await baiduTTS(text,'ara')){sub('',text);return}
-    // 2. Baidu TTS with uy (try Uyghur code)
-    if(await baiduTTS(text,'uy')){sub('',text);return}
-    // 3. Edge TTS ar-SA
-    for(const v of ['ar-SA-HamedNeural','ar-SA-ZariyahNeural','ar-SA']){
-      if(await edgeTTS(text,v,'ar-SA')){sub('',text);return}
-    }
-    // 4. Google via CORS proxy
-    for(const px of ['https://corsproxy.io/?','https://api.allorigins.win/raw?url=']){
-      if(await googleViaProxy(text,'ug',px)){sub('',text);return}
-    }
-    // 5. Google direct
-    if(await googleDirect(text,'ug')){sub('',text);return}
-    // 6. Browser TTS ar
-    if(await browserTTS(text,'ar')){sub('',text);return}
-  } else {
-    // ── UZBEK ──
-    // 1. Baidu TTS with tr (Turkish — same language family)
-    if(await baiduTTS(text,'tr')){sub('',text);return}
-    // 2. Edge TTS uz-UZ
-    for(const v of ['uz-UZ-MadinaNeural','uz-UZ-SardorNeural','uz-UZ']){
-      if(await edgeTTS(text,v,'uz-UZ')){sub('',text);return}
-    }
-    // 3. Google via proxy
-    for(const px of ['https://corsproxy.io/?','https://api.allorigins.win/raw?url=']){
-      if(await googleViaProxy(text,'uz',px)){sub('',text);return}
-    }
-    // 4. Google direct
-    if(await googleDirect(text,'uz')){sub('',text);return}
-    // 5. Browser TTS
-    if(await browserTTS(text,'uz')){sub('',text);return}
-  }
+// ── FULL TEST ──
+function testFull(){var t='ياخشىمۇسىز';sub('测试: '+t,'维吾尔语: ياخشىمۇسىز (你好)');queue.push(t);flush()}
 
-  L('⚠ 所有语音源均失败，仅显示字幕','warn');
-  sub('',text);
-}
-
-// ═══ TEST ═══
-async function testAudio(){
-  L('🔊 完整测试...','warn');
-  const t=lang==='ug'?'ياخشىمۇسىز':'Salom';
-  sub('测试: '+t,'');
-  await speak(t);
-}
-
-// ═══ TRANSLATE ═══
-async function tr(text){
-  const urls=[
-    'https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl='+lang+'&dt=t&q='+encodeURIComponent(text),
-    'https://translate.google.cn/translate_a/single?client=gtx&sl=zh-CN&tl='+lang+'&dt=t&q='+encodeURIComponent(text),
-  ];
-  for(const u of urls){
-    try{const r=await fetch(u,{signal:AbortSignal.timeout(8000)});const d=await r.json();if(d?.[0]){const t=d[0].map(p=>p[0]).join('');L('✓ 翻译: "'+t.slice(0,35)+'..."','ok');return t}}catch(e){}
-  }
-  try{const r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=zh|'+lang,{signal:AbortSignal.timeout(6000)});const d=await r.json();if(d?.responseData?.translatedText) return d.responseData.translatedText}catch(e){}
-  L('❌ 翻译失败','err');sub(text,'❌ 翻译失败');return null;
-}
-
-// ═══ QUEUE ═══
-async function flush(){
-  if(busy||!queue.length) return;
-  busy=!0; const t=queue.shift();
-  await speak(t);
-  busy=!1;
-  if(queue.length) flush();
-  else SS('idle','就绪 — 打字或语音输入');
-}
-
-// ═══ RECOGNITION ═══
-function toggle(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){
-    sub('','请用 Chrome 浏览器或直接打字输入');
-    L('❌ 浏览器不支持语音识别，请打字输入','err');
-    return;
-  }
-  active?stop():start();
-}
-function start(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  rec=new SR; rec.lang='zh-CN'; rec.continuous=!0; rec.interimResults=!0; rec.maxAlternatives=1;
-  rec.onresult=async e=>{
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      if(!e.results[i].isFinal) continue;
-      const t=e.results[i][0].transcript.trim();
-      if(t.length<2) continue;
-      L('🎤 '+t); SS('translating','翻译中'); sub(t,'⏳');
-      const r=await tr(t); if(r){queue.push(r);flush();}
-    }
-  };
-  rec.onerror=e=>{
-    if(e.error==='no-speech'){if(active) SS('listening','监听中');return}
-    if(e.error==='aborted') return;
-    if(e.error==='not-allowed'){L('❌ 麦克风权限被拒','err');stop();return}
-    L('⚠ '+e.error,'warn');
-  };
-  rec.onend=()=>{if(active) setTimeout(()=>{if(active) try{rec.start()}catch(_){}},200)};
-  rec.start(); active=!0;
-  document.getElementById('mb').classList.add('rec');
-  document.getElementById('mbt').textContent='停止监听';
-  SS('listening','监听中...'); sub('','🎤 请说中文...'); L('🎤 语音监听已启动','ok');
-}
-function stop(){
-  active=!1; if(rec){rec.stop();rec=null}
-  queue=[]; busy=!1; if(window.speechSynthesis) speechSynthesis.cancel();
-  document.getElementById('mb').classList.remove('rec');
-  document.getElementById('mbt').textContent='语音监听 (Chrome)';
-  SS('idle','就绪 — 打字或语音输入'); sub('输入文字或按语音按钮',''); L('⏹ 已停止');
-}
-
-// ═══ INIT ═══
-if(window.speechSynthesis){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices()}
-document.addEventListener('click',()=>getAC(),{once:!0});
-document.addEventListener('touchend',()=>getAC(),{once:!0});
-L('✅ 就绪 — 百度TTS优先 | 打字或语音输入','ok');
+// ── RECOGNITION ──
+function toggle(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){sub('','请用 Chrome 或直接打字');L('❌ 浏览器不支持语音识别','err');return}active?stop():start()}
+function start(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;rec=new SR;rec.lang='zh-CN';rec.continuous=!0;rec.interimResults=!0;rec.maxAlternatives=1;rec.onresult=function(e){for(var i=e.resultIndex;i<e.results.length;i++){if(!e.results[i].isFinal)continue;var t=e.results[i][0].transcript.trim();if(t.length<2)continue;L('🎤 '+t);SS('translating','翻译中');tr(t).then(function(r){if(r){queue.push(r);flush()}})}};rec.onerror=function(e){if(e.error==='no-speech'){if(active)SS('listening','监听中');return}if(e.error==='aborted')return;if(e.error==='not-allowed'){L('❌ 麦克风权限被拒','err');stop();return}L('⚠ '+e.error,'warn')};rec.onend=function(){if(active)setTimeout(function(){if(active)try{rec.start()}catch(_){}},200)};rec.start();active=!0;document.getElementById('mb').classList.add('rec');document.getElementById('mbt').textContent='停止监听';SS('listening','监听中...');sub('','🎤 请说中文...');L('🎤 已启动','ok')}
+function stop(){active=!1;if(rec){rec.stop();rec=null}queue=[];busy=!1;if(window.speechSynthesis)speechSynthesis.cancel();document.getElementById('mb').classList.remove('rec');document.getElementById('mbt').textContent='语音监听 (Chrome)';SS('idle','就绪');sub('输入文字或按语音按钮','');L('⏹ 已停止')}
+if(window.speechSynthesis){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=function(){speechSynthesis.getVoices()}}
+document.addEventListener('click',function(){getAC()},{once:!0});document.addEventListener('touchend',function(){getAC()},{once:!0});
+L('✅ 就绪 — Google 翻译 + Google TTS','ok');
 </script>
 </body>
 </html>
